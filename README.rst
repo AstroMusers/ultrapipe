@@ -1,6 +1,6 @@
 ULTRApipe
 =========
-**ULTRApipe** is a Python library for the ULTRASAT mission to perform photometry and light curve analysis relevant to exoplanet research. Its documentation and API will be available via readthedocs.
+**ULTRApipe** is a Python library for the ULTRASAT mission to perform photometry and light curve analysis relevant to exoplanet research. The `API <https://ultrapipe.readthedocs.io/en/latest/>`_ will be continually updated as more tools become available.
 
 Currently, we offer tools for:
 
