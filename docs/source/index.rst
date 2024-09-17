@@ -1,0 +1,17 @@
+.. ultrapipe documentation master file, created by
+   sphinx-quickstart on Mon Sep 16 20:38:32 2024.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+ULTRApipe Documentation
+====================================
+
+ULTRApipe is a software library supporting the ULTRASAT mission. Currently, the repository is hosted on `Github <https://github.com/AstroMusers/ultrapipe/>`_. 
+Currently in development.
+
+Contents
+--------
+
+.. toctree::
+
+   api

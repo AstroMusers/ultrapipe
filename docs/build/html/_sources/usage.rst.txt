@@ -1,0 +1,6 @@
+Usage
+=====
+
+you can use the ``utils.find_nearest()`` function:
+
+.. autofunction:: utils.find_nearest
