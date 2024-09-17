@@ -86,28 +86,31 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LimMag</span></code>(source_position, source_temp, LimMag_dir)</p></td>
 <td><p>A function to be used with the 'LimMag.dat' file for ULTRASAT.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SatMag</span></code>(source_position, source_temp, SatMag_dir)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Plot_Cartesian_Sky_Map</span></code>(N_array[, heatmap_label])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SatMag</span></code>(source_position, source_temp, SatMag_dir)</p></td>
 <td><p>A function to be used with the 'SatMag.dat' file for ULTRASAT.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TESS_MAG_to_Jy</span></code>(TESS_Mag)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TESS_MAG_to_Jy</span></code>(TESS_Mag)</p></td>
 <td><p>Converts from TESS magnitude to spectral flux density in the TESS band (600-1000 nm).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TESS_ULTRASAT_color_transform</span></code>(Teff, logg)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TESS_ULTRASAT_color_transform</span></code>(Teff, logg)</p></td>
 <td><p>Returns the ratio of the integrated PHOENIX spectrum over the ULTRASAT and TESS bandpasses, respectively, of stars with the provided Teff and log(g). REQUIRES AN INTERNET CONNECTION. Args:     Teff (array of float): Array of stellar effective temperatures, in Kelvin     logg (array of float): Array of stellar log(g). Returns:     Ratio (array of float): The ratio (ULTRASAT/TESS) of of the integrated stellar spectra.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_function</span></code>(CVZ_RA, CVZ_DEC, CVZ_radius, ...)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_function</span></code>(CVZ_RA, CVZ_DEC, CVZ_radius, ...)</p></td>
 <td><p>A function that provides a cost function on a particular CVZ FOV based on a target's RA, DEC, ULTRASAT AB mag, and effective temperature.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_function_map</span></code>(targets_RAs, targets_DECs, ...)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_function_map</span></code>(targets_RAs, targets_DECs, ...)</p></td>
 <td><p>Produces a full-sky map of the cost function returned by the list of targets and the specified CVZ FOV.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_coverage_map</span></code>(output_dir[, radius, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_coverage_map</span></code>(output_dir[, radius, ...])</p></td>
 <td><p>Summary Generates a 2D Cartesian grid of available mission data based on the resolution and radius specified. Args:     output_dir (string, _type_): The directory to save the data coverage map. radius (int, optional): The radius FOV (in degrees) to which to sum over the file counts. resolution (int, optional): The resolution of the 2D grid (e.g., 50 will output a 50x50 grid, evenly spaced in RA/DEC).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dust_map</span></code>([resolution, dist, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dust_map</span></code>([resolution, dist, ...])</p></td>
 <td><p>Produces an NxN dust map of interestellar extinction at a given distance.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_nearest</span></code>(array, value)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_nearest</span></code>(array, value)</p></td>
 <td><p>A utility function that returns the index of the value in an array that is closest to the value provided.</p></td>
 </tr>
 </tbody>

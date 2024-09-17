@@ -45,8 +45,8 @@ Generating the Figures
 To generate the above figures, we can use the ``utils.dust_map()`` and ``utils.cost_function()`` in tandem with ``utils.Plot_Cartesian_Sky_Map()``.
 
 All that is needed are the relevant data lists for your targets:
-``
-import utils as ut
+
+``import utils as ut
 import pandas as pd
 data = pd.read_csv('data/Composite_TOI_Host.csv')
 ra = data['ra']
@@ -57,18 +57,15 @@ Teff = data['st_teff']
 weight = data['Weight']
 data_size = data['Data_Size']
 SAT_Mag_dir = '../ultrapipe/systematics/SatMag.csv'
-LIM_Mag_dir = '../ultrapipe/systematics/SatMag.csv'
-``
+LIM_Mag_dir = '../ultrapipe/systematics/SatMag.csv'``
 
 To plot the cost function:
-``
-CF_Map = ut.cost_function_map(ra, dec, AB, dist, Teff, weight, data_size, SAT_Mag_dir, LIM_Mag_dir, radius = 7, output_dir=None, 
+
+``CF_Map = ut.cost_function_map(ra, dec, AB, dist, Teff, weight, data_size, SAT_Mag_dir, LIM_Mag_dir, radius = 7, output_dir=None, 
                               resolution = 15, dust_map_version='bayestar2019')
-ut.Plot_Cartesian_Sky_Map(CF_Map)
-``
+ut.Plot_Cartesian_Sky_Map(CF_Map)``
 
 To plot the dust map(s):
-``
-dust_map = ut.dust_map(100, dist = 500)
-ut.Plot_Cartesian_Sky_Map(dust_map)
-``
+
+``dust_map = ut.dust_map(100, dist = 500)
+ut.Plot_Cartesian_Sky_Map(dust_map)``

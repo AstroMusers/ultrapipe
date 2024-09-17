@@ -10,6 +10,7 @@
    
       Jy_to_AB_MAG
       LimMag
+      Plot_Cartesian_Sky_Map
       SatMag
       TESS_MAG_to_Jy
       TESS_ULTRASAT_color_transform
