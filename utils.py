@@ -8,6 +8,7 @@ import math
 import csv
 from expecto import get_spectrum
 from scipy.integrate import simpson
+from matplotlib import pyplot as plt
 
 radial_pos = [0,0.42,0.84,1.27,1.69,2.11,2.53,2.95,3.38,3.8,4.22,4.64,5.06,5.49,5.91,6.33,6.75,7.17,7.6,8.02,8.44,8.86,9.28,9.71,10.13]
 source_T = [9600,9040,8750,8310,7920,29200,23000,17600,15200,12300,11400,7350,7050,6700,6550,6300,6050,5800,5660,5440,5240,4960,4800,4600,4400,4000,3750,3700,3600,3500,3400,3200,3100,54000,37800]
@@ -81,7 +82,7 @@ def LimMag(source_position,source_temp, LimMag_dir):
     temperature = find_nearest(source_T,source_temp)
     return Limiting_Mag_Array[temperature][position]
 
-def cost_function(CVZ_RA, CVZ_DEC, CVZ_radius, targets_RAs, targets_DECs, targets_AB_mag, targets_temps, reddening=None,target_weight_list=None, data_weight_list=None, extinction_coeff = 5.487):
+def cost_function(CVZ_RA, CVZ_DEC, CVZ_radius, targets_RAs, targets_DECs, targets_AB_mag, targets_temps, SAT_Mag_Dir, LIM_Mag_Dir, reddening=None,target_weight_list=None, data_weight_list=None, extinction_coeff = 5.487):
     """A function that provides a cost function on a particular CVZ FOV based on a target's RA, DEC, ULTRASAT AB mag, and effective temperature. Also accounts for dust extinction.
 
     Args:
@@ -92,6 +93,8 @@ def cost_function(CVZ_RA, CVZ_DEC, CVZ_radius, targets_RAs, targets_DECs, target
         targets_DECs (array of floats): The list of DECs of the proposed targets.
         targets_AB_mag (array of floats): The list of AB magnitude in the ULTRASAT band of the proposed targets.
         targets_temps (array of floats): The effective temperatures of the proposed targets
+        SAT_Mag_Dir (string): The directory to the `SatMag.csv` file
+        LIM_Mag_Dir (string): The directory to the `LimMag.csv` file
         reddening (float, optional): The dust extinction suffered by the target
         target_weight_list (array of floats, optional): A list corresponding to the weights given to a given target.
         data_weight_list (array of floats, optional): A list corresponding to the weights given to the associated data of a given target.
@@ -121,8 +124,8 @@ def cost_function(CVZ_RA, CVZ_DEC, CVZ_radius, targets_RAs, targets_DECs, target
                 dist = 0
         dist = np.sqrt(target_RA**2 + target_DEC**2)
         if dist < CVZ_radius:
-            sat_mag = SatMag(dist, targets_temps[index])
-            lim_mag = LimMag(dist, targets_temps[index])
+            sat_mag = SatMag(dist, targets_temps[index], SAT_Mag_Dir)
+            lim_mag = LimMag(dist, targets_temps[index], LIM_Mag_Dir)
             
             red = reddening[index]
             if math.isnan(red) == True:
@@ -131,20 +134,17 @@ def cost_function(CVZ_RA, CVZ_DEC, CVZ_radius, targets_RAs, targets_DECs, target
             data_weight = data_weight_list[index]
             AB_mag = targets_AB_mag[index]
             total_AB_Mag = AB_mag + extinction_coeff*red
-            if total_AB_Mag > 18 and AB_mag < 18:
-                print(AB_mag, total_AB_Mag)
             if (total_AB_Mag < 13) and (total_AB_Mag > sat_mag):
                 target_count += target_weight*1*((4-1)*(data_weight - 1)/(2-1) + 1)
             elif (total_AB_Mag < 18) and (total_AB_Mag > sat_mag):
                 target_count += target_weight*0.5*((4-1)*(data_weight - 1)/(2-1) + 1)
-            elif (total_AB_Mag < 21) and (total_AB_Mag > sat_mag):
+            elif (total_AB_Mag < lim_mag) and (total_AB_Mag > sat_mag):
                 target_count += target_weight*0.25*((4-1)*(data_weight - 1)/(2-1) + 1)
-            # targets.append((target_name[index], targets_RAs[index], targets_DECs[index], targets_temps[index], total_AB_Mag, TESS_Mag[index], CVZ_Name))
     if target_count == 0:
         return -1
     return target_count
 
-def cost_function_map(targets_RAs, targets_DECs, target_AB_MAG,target_distance, target_tmp, target_weight_list, data_weight_list, radius=7, output_dir=None, resolution=50, dust_map_version = 'bayestar2019'):
+def cost_function_map(targets_RAs, targets_DECs, target_AB_MAG,target_distance, target_tmp, target_weight_list, data_weight_list,SAT_Mag_Dir, LIM_Mag_Dir, radius=7, output_dir=None, resolution=50, dust_map_version = 'bayestar2019'):
     """Produces a full-sky map of the cost function returned by the list of targets and the specified CVZ FOV. The function iterates a circular FOV with a provided radius
     iteratively across the sky. It then checks the lists of targets provided, and returns the weight described in the function 'cost_function'.
     It automatically corrects for magnitude increases due interstellar extinction in the ULTRASAT band.
@@ -157,6 +157,8 @@ def cost_function_map(targets_RAs, targets_DECs, target_AB_MAG,target_distance, 
         target_tmp (array of floats): An array of target effective temperatures, in Kelvin.
         target_weight_list (array of floats): An array of assigned weights to each target.
         data_weight_list (array of floats): An array of assigned weights to each target for available data (can be passed as an array of 0s, if desired).
+        SAT_Mag_Dir (string): The directory to the `SatMag.csv` file
+        LIM_Mag_Dir (string): The directory to the `LimMag.csv` file
         radius (int, optional): The radius, in degrees, of the proposed FOV to iterate over the sky. Defaults to 7.
         output_dir (string, optional): The output directory of the cost function map. Defaults to None.
         resolution (int, optional): The N resolution of the resulting NxN map.  Defaults to 50.
@@ -168,15 +170,17 @@ def cost_function_map(targets_RAs, targets_DECs, target_AB_MAG,target_distance, 
     CF_map = []
     RA_span = np.linspace(0, 360, num=resolution)
     DEC_span = np.linspace(-90, 90, num=resolution)
-    for i in range(len(DEC_span)):
+    for i, DEC in enumerate(DEC_span):
         values_DEC = []
-        for j in range(len(RA_span)):
-            a = cost_function(RA_span[j], DEC_span[i], radius, targets_RAs, targets_DECs, target_AB_MAG, target_tmp, reddening, target_weight_list, data_weight_list)
+        for j, RA in enumerate(RA_span):
+            a = cost_function(RA_span[j], DEC_span[i], radius, targets_RAs, targets_DECs, target_AB_MAG, target_tmp, SAT_Mag_Dir, LIM_Mag_Dir, reddening, target_weight_list, data_weight_list)
             values_DEC.append(a)
         CF_map.append(values_DEC)
-        print(i, a)
+        print('Current DEC: ' + str(DEC))
     if output_dir != None:
         np.savetxt(output_dir, CF_map, delimiter=',')
+    else:
+        return np.flipud(CF_map)
 
 def data_coverage_map(output_dir, radius=7, resolution=50, project='TESS'):
     """Summary
@@ -219,16 +223,13 @@ def dust_map(resolution = 50, dist=50, extinction_coeff = 5.487, output_dir=None
         for RAs in RA_span:
             tot_RA.append(RAs)
             tot_DEC.append(DECs)
-            if DECs < 0:
-                print(DECs)
     tot_DEC = np.array(tot_DEC)
     tot_RA = np.array(tot_RA)
-    print(tot_DEC.shape, tot_RA.shape)
     dist_array = np.ones(len(tot_RA))*dist
     bayestar = BayestarWebQuery(version='bayestar2019')
     coords = SkyCoord(tot_RA*u.deg, tot_DEC*u.deg, distance=dist_array*u.pc,  frame='icrs')
-    reddening = bayestar(coords, mode='median')      
-    print(reddening)
+    reddening = bayestar(coords, mode='median')   
+    print(reddening)   
     dust_map = []
     dust = []
     count = 0
@@ -243,7 +244,9 @@ def dust_map(resolution = 50, dist=50, extinction_coeff = 5.487, output_dir=None
         count += 1
     dust_map.append(dust)
     if output_dir != None:
-        np.savetxt(output_dir, dust_map, delimiter=',') 
+        np.savetxt(output_dir, dust_map, delimiter=',')
+    else:
+        return np.flipud(dust_map)
 
 def TESS_ULTRASAT_color_transform(Teff, logg):
     """Returns the ratio of the integrated PHOENIX spectrum over the ULTRASAT and TESS bandpasses, respectively, of stars with the provided Teff and log(g).
@@ -269,3 +272,10 @@ def TESS_ULTRASAT_color_transform(Teff, logg):
             ratio.append(simpson(flux[ULTRA_lower:ULTRA_upper], wavelength[ULTRA_lower:ULTRA_upper])/simpson(flux[TESS_lower:TESS_upper], wavelength[TESS_lower:TESS_upper]))
         except:
             ratio.append(np.nan)
+
+def Plot_Cartesian_Sky_Map(N_array, heatmap_label=''):
+    plt.xlabel('RA')
+    plt.ylabel('DEC')
+    plt.imshow(N_array, extent=[0, 360, 90, -90])
+    plt.colorbar(label=heatmap_label)
+    plt.show()

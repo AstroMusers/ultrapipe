@@ -6,7 +6,7 @@
 ULTRApipe Documentation
 ====================================
 
-ultrapipe is a software library supporting the ULTRASAT mission. Currently, the repository is hosted on `Github <https://github.com/AstroMusers/ultrapipe/>`_. 
+ULTRApipe is a software library supporting the ULTRASAT mission. Currently, the repository is hosted on `Github <https://github.com/AstroMusers/ultrapipe/>`_. 
 Currently in development.
 
 Contents
