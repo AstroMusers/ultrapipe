@@ -15,7 +15,7 @@ Histogram of the TESS/ULTRASAT magnitude of known or PC exoplanetary systems.
 - Dust Maps
 
 .. image:: /media/graphics/Dust_Map.png
-  :width: 600
+  :width: 800
   :alt: 3D dust map using the Pan-STARRS 1, 2MASS, and Gaia mission generated using data by `Green et al. 2019 <http://argonaut.rc.fas.harvard.edu/>`. The above maps show the magntiude extinction in the UV band (~230-300 nm) for declinations above -30 degrees at varying distances.
 
 3D dust map using the Pan-STARRS 1, 2MASS, and Gaia mission generated using data by `Green et al. 2019 <http://argonaut.rc.fas.harvard.edu/>`. The above maps show the magntiude extinction in the UV band (~230-300 nm) for declinations above -30 degrees at varying distances.
@@ -23,7 +23,7 @@ Histogram of the TESS/ULTRASAT magnitude of known or PC exoplanetary systems.
 - CVZ Cost Functions for Exoplanet Systems
 
 .. image:: /media/graphics/Cost_Function.png
-  :width: 600
+  :width: 800
   :alt: A cost function map of known or PC TOI systems for different proposed 7x7 degree continous viewing zones. The weights and parameterization of the cost map can be found in the `utils.py` file.
 
 A cost function map of known or PC TOI systems for different proposed 7x7 degree continous viewing zones. The weights and parameterization of the cost map can be found in the `utils.py` file.
