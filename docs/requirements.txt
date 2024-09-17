@@ -1,0 +1,8 @@
+astropy==6.1.1
+astroquery==0.4.7
+numpy==2.0.0
+pandas==2.2.2
+dustmaps==1.0.13
+expecto==0.1.4
+scipy==1.14.0
+matplotlib==3.9.1
