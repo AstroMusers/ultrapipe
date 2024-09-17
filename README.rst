@@ -5,6 +5,9 @@ ULTRApipe
 Currently, we offer tools for:
 
 - Conversions from TESS magntiude to ULTRASAT magnitude
+.. image:: /media/graphics/TESS_to_ULTRASAT_Mag.png
+  :width: 400
+  :alt: Histogram of the TESS/ULTRASAT magnitude of known or PC exoplanetary systems.
 - Dust Maps
 - CVZ Cost Functions for Exoplanet Systems
 - ULTRASAT Systematics and Throughput Data
