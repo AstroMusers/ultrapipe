@@ -6,3 +6,4 @@ dustmaps==1.0.13
 expecto==0.1.4
 scipy==1.14.0
 matplotlib==3.9.1
+sphinx-rtd-theme==2.0.0
