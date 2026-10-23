@@ -1,0 +1,10 @@
+data/
+visuals/
+__pycache__/
+*.py[cod]
+*.egg-info/
+data/
+visuals/
+__pycache__/
+*.py[cod]
+*.egg-info/

@@ -1,11 +1,21 @@
 ULTRApipe
 =========
-**ULTRApipe** is a Python library for the ULTRASAT mission to perform photometry and light curve analysis relevant to exoplanet research. The `API <https://ultrapipe.readthedocs.io/en/latest/>`_ will be continually updated as more tools become available.
+How bright will known and candidate exoplanet hosts appear to ULTRASAT in the
+near ultraviolet, once stellar color and interstellar dust enter the picture?
+And which proposed fields put the most interesting systems in reach? We use
+**ULTRApipe** to estimate those magnitudes with color transformations and 3D
+dust maps, then compare the exoplanet science potential of proposed pointings.
+The repository also collects ULTRASAT throughput and detector limiting- and
+saturation-magnitude data, so the instrumental assumptions stay visible. The
+`API <https://ultrapipe.readthedocs.io/en/latest/>`_ documents the available
+tools.
 
-Currently, we offer tools for:
+Set ``ULTRAPIPE_PATH`` to the checkout directory when using the tools from another location. If it is unset, the repository uses its checkout root. Keep local inputs in the ignored ``data/`` directory and generated figures in the ignored ``visuals/`` directory. The derived ``Composite_TOI_Host.csv`` catalog is not distributed in Git; supply it under ``data/`` with the columns ``ra``, ``dec``, ``AB_Mag``, ``sy_dist``, ``st_teff``, ``Weight``, and ``Data_Size`` to reproduce the field map.
+
+Here is what the current tools let us do:
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Color-transformations to/from ULTRASAT passband in NUV (230-290 nm)
+ULTRASAT near-UV color transformations
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 A plot of the TESS and ULTRASAT magnitudes of stars hosting confirmed exoplanets is below.
@@ -19,19 +29,30 @@ Predicting ULTRASAT magnitudes
 ++++++++++++++++++++++++++++++
 .. image:: /media/graphics/Dust_Map.png
   :width: 800
-  :alt: 3D dust map using the Pan-STARRS 1, 2MASS, and Gaia mission generated using data by `Green et al. 2019 <http://argonaut.rc.fas.harvard.edu/>`. The above maps show the magntiude extinction in the UV band (~230-300 nm) for declinations above -30 degrees at varying distances.
+  :alt: Near-UV dust extinction from Pan-STARRS 1, 2MASS, and Gaia for declinations above -30 degrees at several distances.
 
-Computing the ULTRASAT magnitudes taking into account the color transformation and dust extinction in the ULTRASAT band. We use the 3D dust map derived from Pan-STARRS 1, 2MASS, and Gaia `Green et al. 2019 <http://argonaut.rc.fas.harvard.edu/>`_. The above maps show the magntiude extinction in the UV band for declinations above -30 degrees at varying distances.
+We estimate ULTRASAT magnitudes from stellar color transformations and dust
+extinction, using the 3D dust map derived from Pan-STARRS 1, 2MASS, and Gaia
+`Green et al. 2019 <http://argonaut.rc.fas.harvard.edu/>`_. The maps show how
+near-ultraviolet extinction changes with distance for declinations above -30
+degrees.
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Estimate of exoplanet science potential for potential ULTRASAT pointings
+Ranking proposed ULTRASAT fields for exoplanet science
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. image:: /media/graphics/Cost_Function.png
   :width: 800
-  :alt: A cost function map of known or PC TOI systems for different proposed 7x7 degree continous viewing zones. The weights and parameterization of the cost map can be found in the `utils.py` file.
+  :alt: A cost map of known and candidate TOI systems across proposed 7-by-7-degree continuous-viewing zones.
 
-An estimation of the exoplanet science potential of ULTRASAT using the known and candidate exoplanets. The weights and parameterization of the map can be found in the `utils.py` file.
+We use known and candidate exoplanets to make a first-pass map of the science
+potential across proposed ULTRASAT fields. The map's weights and
+parameterization are in `utils.py`.
+
+We measure target offsets with Astropy's spherical angular separation, including
+right-ascension wraparound and both poles. The field radius describes a circular
+on-sky approximation. Exact detector footprints are not modeled by this score.
+We have not regenerated the displayed maps for this geometry correction.
 
 +++++++++++++++++++++++++++++++++++
 ULTRASAT Systematics and Throughput
@@ -42,15 +63,16 @@ Several useful data files are also hosted here, detailing the throughput of ULTR
 ++++++++++++++++++++++
 Generating the Figures
 ++++++++++++++++++++++
-To generate the above figures, we can use the ``utils.dust_map()`` and ``utils.cost_function()`` in tandem with ``utils.Plot_Cartesian_Sky_Map()``.
+To generate the above figures, we can use ``utils.dust_map()`` and ``utils.cost_function_map()`` in tandem with ``utils.Plot_Cartesian_Sky_Map()``.
 
 All that is needed are the relevant data lists for your targets:
 
 .. code-block:: python
     
     import utils as ut
+    from paths import get_data_path, get_repository_path, get_visuals_path
     import pandas as pd
-    data = pd.read_csv('data/Composite_TOI_Host.csv')
+    data = pd.read_csv(get_data_path() / 'Composite_TOI_Host.csv')
     ra = data['ra']
     dec = data['dec']
     AB = data['AB_Mag']
@@ -58,8 +80,8 @@ All that is needed are the relevant data lists for your targets:
     Teff = data['st_teff']
     weight = data['Weight']
     data_size = data['Data_Size']
-    SAT_Mag_dir = '../ultrapipe/systematics/SatMag.csv'
-    LIM_Mag_dir = '../ultrapipe/systematics/SatMag.csv'
+    SAT_Mag_dir = get_repository_path() / 'systematics' / 'SatMag.csv'
+    LIM_Mag_dir = get_repository_path() / 'systematics' / 'LimMag.csv'
 
 To plot the cost function:
 
@@ -67,7 +89,7 @@ To plot the cost function:
 
     CF_Map = ut.cost_function_map(ra, dec, AB, dist, Teff, weight, data_size, SAT_Mag_dir, LIM_Mag_dir, radius = 7, output_dir=None, 
                                 resolution = 15, dust_map_version='bayestar2019')
-    ut.Plot_Cartesian_Sky_Map(CF_Map)
+    ut.Plot_Cartesian_Sky_Map(CF_Map, output_path=get_visuals_path() / 'ultrasat_exoplanet_field_cost.png')
 
 To plot the dust map(s):
 

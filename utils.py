@@ -85,6 +85,10 @@ def LimMag(source_position,source_temp, LimMag_dir):
 def cost_function(CVZ_RA, CVZ_DEC, CVZ_radius, targets_RAs, targets_DECs, targets_AB_mag, targets_temps, SAT_Mag_Dir, LIM_Mag_Dir, reddening=None,target_weight_list=None, data_weight_list=None, extinction_coeff = 5.487):
     """A function that provides a cost function on a particular CVZ FOV based on a target's RA, DEC, ULTRASAT AB mag, and effective temperature. Also accounts for dust extinction.
 
+    The circular field uses spherical angular separation in degrees, including
+    right-ascension wraparound and both poles. An exact detector footprint is
+    not modeled by this radius approximation.
+
     Args:
         CVZ_RA (float): The RA where the proposed CVZ is centered.
         CVZ_DEC (float): The DEC where the proposed CVZ is centered.
@@ -106,23 +110,11 @@ def cost_function(CVZ_RA, CVZ_DEC, CVZ_radius, targets_RAs, targets_DECs, target
         Weight (float): Gives the aggregate weight of the proposed CVZ based on the passed targets.
     """    
     CVZ_coord = SkyCoord(CVZ_RA, CVZ_DEC, unit='deg', frame='icrs')
-    CVZ_RA = float(CVZ_coord.ra.degree)
-    CVZ_DEC = float(CVZ_coord.dec.degree)
+    target_coords = SkyCoord(targets_RAs, targets_DECs, unit='deg', frame='icrs')
+    separations = CVZ_coord.separation(target_coords).degree  # [deg]
     target_count = 0
     for index in range(len(targets_RAs)):
-        target_RA = targets_RAs[index] - CVZ_RA
-        target_DEC = targets_DECs[index] - CVZ_DEC
-        if target_RA < 0:
-            target_RA += 360
-        if target_RA > 360:
-            target_RA -= 360
-        if CVZ_DEC == 90:
-            if target_DEC > (90-CVZ_radius):
-                dist = 0
-        if CVZ_DEC == -90:
-            if target_DEC < (-90+CVZ_radius):
-                dist = 0
-        dist = np.sqrt(target_RA**2 + target_DEC**2)
+        dist = separations[index]  # [deg]
         if dist < CVZ_radius:
             sat_mag = SatMag(dist, targets_temps[index], SAT_Mag_Dir)
             lim_mag = LimMag(dist, targets_temps[index], LIM_Mag_Dir)
@@ -273,9 +265,22 @@ def TESS_ULTRASAT_color_transform(Teff, logg):
         except:
             ratio.append(np.nan)
 
-def Plot_Cartesian_Sky_Map(N_array, heatmap_label=''):
-    plt.xlabel('RA')
-    plt.ylabel('DEC')
-    plt.imshow(N_array, extent=[0, 360, 90, -90])
-    plt.colorbar(label=heatmap_label)
-    plt.show()
+def Plot_Cartesian_Sky_Map(N_array, heatmap_label='', typeplotback=None, output_path=None):
+    from tdpy.plotting import apply_plot_theme, plot_style
+    from pathlib import Path
+
+    with plot_style(typeplotback):
+        plt.xlabel('RA')
+        plt.ylabel('DEC')
+        plt.imshow(N_array, extent=[0, 360, 90, -90])
+        plt.colorbar(label=heatmap_label)
+        figure = plt.gcf()
+        apply_plot_theme(figure)
+        if output_path is not None:
+            from tdpy.verbosity import print
+
+            output_path = Path(output_path)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            print(f'Writing to {output_path}...')
+            figure.savefig(output_path, dpi=300, bbox_inches='tight', facecolor=figure.get_facecolor())
+        plt.show()
