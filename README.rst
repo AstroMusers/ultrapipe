@@ -109,3 +109,10 @@ installed, a hoverable HTML chart under ``examples/visuals/``. These scores
 demonstrate the pipeline only; they are not real pointing recommendations and
 the notebook does not query Bayestar. Install Bokeh with
 ``python -m pip install bokeh`` for the interactive chart.
+
+.. image:: examples/visuals/ultrapipe_synthetic_field_scores.png
+  :alt: Synthetic target scores for three trial ULTRASAT field centers.
+  :width: 700px
+
+The `interactive Bokeh chart <examples/visuals/ultrapipe_synthetic_field_scores.html>`_
+shows each field's RA, Dec, and toy score on hover.
