@@ -3,12 +3,31 @@ from astropy.coordinates import SkyCoord
 from astroquery.mast import Observations
 import numpy as np
 import pandas as pd
-from dustmaps.bayestar import BayestarWebQuery
+try:
+    from dustmaps.bayestar import BayestarWebQuery
+except ImportError:
+    BayestarWebQuery = None
 import math
 import csv
-from expecto import get_spectrum
+try:
+    from expecto import get_spectrum
+except ImportError:
+    get_spectrum = None
 from scipy.integrate import simpson
 from matplotlib import pyplot as plt
+from tdpy.verbosity import print
+
+
+def _require_bayestar():
+    if BayestarWebQuery is None:
+        raise ImportError("Install dustmaps to query Bayestar dust maps.")
+    return BayestarWebQuery
+
+
+def _require_expecto():
+    if get_spectrum is None:
+        raise ImportError("Install expecto to calculate stellar color transformations.")
+    return get_spectrum
 
 radial_pos = [0,0.42,0.84,1.27,1.69,2.11,2.53,2.95,3.38,3.8,4.22,4.64,5.06,5.49,5.91,6.33,6.75,7.17,7.6,8.02,8.44,8.86,9.28,9.71,10.13]
 source_T = [9600,9040,8750,8310,7920,29200,23000,17600,15200,12300,11400,7350,7050,6700,6550,6300,6050,5800,5660,5440,5240,4960,4800,4600,4400,4000,3750,3700,3600,3500,3400,3200,3100,54000,37800]
@@ -59,7 +78,9 @@ def SatMag(source_position,source_temp, SatMag_dir):
     Returns:
         Sat Mag (float): The saturation AB magnitude in the ULTRASAT band
     """    
-    Saturation_Mag_Array = list(csv.reader(open(SatMag_dir)))
+    print(f"Reading from {SatMag_dir}...")
+    with open(SatMag_dir, newline="") as file_object:
+        Saturation_Mag_Array = list(csv.reader(file_object))
     Saturation_Mag_Array = [[float(y) for y in x] for x in Saturation_Mag_Array]
     position = find_nearest(radial_pos, source_position)
     temperature = find_nearest(source_T,source_temp)
@@ -76,7 +97,9 @@ def LimMag(source_position,source_temp, LimMag_dir):
     Returns:
         Lim Mag (float): The limiting AB magnitude in the ULTRASAT band
     """   
-    Limiting_Mag_Array = list(csv.reader(open(LimMag_dir)))
+    print(f"Reading from {LimMag_dir}...")
+    with open(LimMag_dir, newline="") as file_object:
+        Limiting_Mag_Array = list(csv.reader(file_object))
     Limiting_Mag_Array = [[float(y) for y in x] for x in Limiting_Mag_Array]
     position = find_nearest(radial_pos, source_position)
     temperature = find_nearest(source_T,source_temp)
@@ -156,7 +179,7 @@ def cost_function_map(targets_RAs, targets_DECs, target_AB_MAG,target_distance, 
         resolution (int, optional): The N resolution of the resulting NxN map.  Defaults to 50.
         dust_map_version (str, optional): The dust map version to use to compute reddening. Options are bayestar2015, bayestar2017, and bayestar2019. Defaults to 'bayestar2019'.
     """    
-    bayestar = BayestarWebQuery(version=dust_map_version)
+    bayestar = _require_bayestar()(version=dust_map_version)
     coords = SkyCoord(np.array(targets_RAs)*u.deg, np.array(targets_DECs)*u.deg, distance=np.array(target_distance)*u.pc,  frame='icrs')
     reddening = bayestar(coords, mode='median')    
     CF_map = []
@@ -218,7 +241,7 @@ def dust_map(resolution = 50, dist=50, extinction_coeff = 5.487, output_dir=None
     tot_DEC = np.array(tot_DEC)
     tot_RA = np.array(tot_RA)
     dist_array = np.ones(len(tot_RA))*dist
-    bayestar = BayestarWebQuery(version='bayestar2019')
+    bayestar = _require_bayestar()(version='bayestar2019')
     coords = SkyCoord(tot_RA*u.deg, tot_DEC*u.deg, distance=dist_array*u.pc,  frame='icrs')
     reddening = bayestar(coords, mode='median')   
     print(reddening)   
@@ -249,10 +272,11 @@ def TESS_ULTRASAT_color_transform(Teff, logg):
     Returns:
         Ratio (array of float): The ratio (ULTRASAT/TESS) of of the integrated stellar spectra.
     """    
-    ratio = []    
+    spectrum_loader = _require_expecto()
+    ratio = []
     for index, value in enumerate(Teff):
         try: 
-            spectrum = get_spectrum(
+            spectrum = spectrum_loader(
                 T_eff=value, log_g=logg[index], cache=True
             )
             wavelength = np.array(spectrum.wavelength)

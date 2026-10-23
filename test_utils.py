@@ -1,7 +1,10 @@
 import ast
 import csv
+import importlib.util
+import json
 import math
 from pathlib import Path
+import sys
 
 import numpy as np
 import pytest
@@ -9,6 +12,64 @@ from astropy.coordinates import SkyCoord
 
 
 ROOT = Path(__file__).resolve().parent
+
+
+def test_synthetic_field_notebook_uses_cost_pipeline_and_keeps_paths_private():
+    path = ROOT / 'examples' / 'synthetic_field_ranking.ipynb'
+    print('Reading from examples/synthetic_field_ranking.ipynb...')
+    notebook = json.loads(path.read_text(encoding='utf-8'))
+    code = '\n'.join(
+        ''.join(cell['source'])
+        for cell in notebook['cells']
+        if cell['cell_type'] == 'code'
+    )
+    document = json.dumps(notebook)
+
+    assert 'from utils import cost_function' in code
+    assert 'score = cost_function(' in code
+    assert 'save_bokeh_html(' in code
+    assert 'get_visuals_path().parent / "examples" / "visuals"' in code
+    assert 'explicitly synthetic' in document
+    assert '/' + 'Users/' not in document
+    static_path = ROOT / 'examples' / 'visuals' / 'ultrapipe_synthetic_field_scores.png'
+    interactive_path = ROOT / 'examples' / 'visuals' / 'ultrapipe_synthetic_field_scores.html'
+    assert static_path.is_file() and static_path.stat().st_size > 0
+    print(f'Reading from {interactive_path.relative_to(ROOT)}...')
+    interactive_html = interactive_path.read_text(encoding='utf-8')
+    assert 'Synthetic ULTRASAT field scores' in interactive_html
+    assert '/' + 'Users/' not in interactive_html
+
+
+def test_utils_imports_without_online_model_dependencies(monkeypatch):
+    for module_name in ("dustmaps", "dustmaps.bayestar", "expecto"):
+        monkeypatch.setitem(sys.modules, module_name, None)
+    spec = importlib.util.spec_from_file_location(
+        "ultrapipe_utils_without_online_models", ROOT / "utils.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, spec.name, module)
+    spec.loader.exec_module(module)
+
+    score = module.cost_function(
+        0.0,
+        0.0,
+        7.0,
+        [0.0],
+        [0.0],
+        [20.0],
+        [9600.0],
+        ROOT / "systematics" / "SatMag.csv",
+        ROOT / "systematics" / "LimMag.csv",
+        reddening=[0.0],
+        target_weight_list=[1.0],
+        data_weight_list=[1.0],
+    )
+
+    assert score == 0.25
+    with pytest.raises(ImportError, match="dustmaps"):
+        module.dust_map(resolution=1)
+    with pytest.raises(ImportError, match="expecto"):
+        module.TESS_ULTRASAT_color_transform([9600.0], [4.0])
 
 
 @pytest.fixture
@@ -23,7 +84,9 @@ def cost_helpers():
     ) or (
         isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id in constants for target in node.targets)
     )]
-    namespace = {'np': np, 'csv': csv, 'math': math, 'SkyCoord': SkyCoord}
+    from tdpy.verbosity import print as verbosity_print
+
+    namespace = {'np': np, 'csv': csv, 'math': math, 'SkyCoord': SkyCoord, 'print': verbosity_print}
     exec(compile(ast.Module(body=selected, type_ignores=[]), str(path), 'exec'), namespace)
     return namespace
 

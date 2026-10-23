@@ -97,3 +97,15 @@ To plot the dust map(s):
 
     dust_map = ut.dust_map(100, dist = 500)
     ut.Plot_Cartesian_Sky_Map(dust_map)
+
+Offline synthetic example
+-------------------------
+
+The `synthetic field-ranking notebook <examples/synthetic_field_ranking.ipynb>`_
+passes six toy targets through ``utils.cost_function()`` for three trial field
+centers, using the tracked saturation and limiting-magnitude tables. Zero
+reddening keeps the example offline. It saves a static PNG and, with Bokeh
+installed, a hoverable HTML chart under ``examples/visuals/``. These scores
+demonstrate the pipeline only; they are not real pointing recommendations and
+the notebook does not query Bayestar. Install Bokeh with
+``python -m pip install bokeh`` for the interactive chart.
