@@ -10,7 +10,7 @@ saturation-magnitude data, so the instrumental assumptions stay visible. The
 `API <https://ultrapipe.readthedocs.io/en/latest/>`_ documents the available
 tools.
 
-Set ``ULTRAPIPE_PATH`` to the checkout directory when using the tools from another location. If it is unset, the repository uses its checkout root. Keep local inputs in the ignored ``data/`` directory and generated figures in the ignored ``visuals/`` directory. The derived ``Composite_TOI_Host.csv`` catalog is not distributed in Git; supply it under ``data/`` with the columns ``ra``, ``dec``, ``AB_Mag``, ``sy_dist``, ``st_teff``, ``Weight``, and ``Data_Size`` to reproduce the field map.
+Set ``ULTRAPIPE_PATH`` to the checkout directory when using the tools from another location. If unset, the tools use this checkout. Keep local inputs in the ignored ``data/`` directory and generated figures in ``visuals/``. Git does not include the derived ``Composite_TOI_Host.csv`` catalog. To reproduce the field map, place it in ``data/`` with columns ``ra``, ``dec``, ``AB_Mag``, ``sy_dist``, ``st_teff``, ``Weight``, and ``Data_Size``.
 
 Here is what the current tools let us do:
 
@@ -105,9 +105,9 @@ The `synthetic field-ranking notebook <examples/synthetic_field_ranking.ipynb>`_
 passes six toy targets through ``utils.cost_function()`` for three trial field
 centers, using the tracked saturation and limiting-magnitude tables. Zero
 reddening keeps the example offline. It saves a static PNG and, with Bokeh
-installed, a hoverable HTML chart under ``examples/visuals/``. These scores
-demonstrate the pipeline only; they are not real pointing recommendations and
-the notebook does not query Bayestar. Install Bokeh with
+installed, a hoverable HTML chart under ``examples/visuals/``. The six targets
+are synthetic, and the notebook does not query Bayestar. The scores illustrate
+pipeline behavior and do not guide real pointings. Install Bokeh with
 ``python -m pip install bokeh`` for the interactive chart.
 
 .. image:: examples/visuals/ultrapipe_synthetic_field_scores.png
