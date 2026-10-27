@@ -49,10 +49,10 @@ We use known and candidate exoplanets to make a first-pass map of the science
 potential across proposed ULTRASAT fields. The map's weights and
 parameterization are in `utils.py`.
 
-We measure target offsets with Astropy's spherical angular separation, including
-right-ascension wraparound and both poles. The field radius describes a circular
-on-sky approximation. Exact detector footprints are not modeled by this score.
-We have not regenerated the displayed maps for this geometry correction.
+The current score measures target offsets with Astropy's spherical angular
+separation, including right-ascension wraparound and both poles. It treats each
+field as a circular region and does not model the exact detector footprint. The
+displayed maps predate this geometry correction.
 
 +++++++++++++++++++++++++++++++++++
 ULTRASAT Systematics and Throughput
