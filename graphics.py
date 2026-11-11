@@ -13,7 +13,7 @@ weight = data['Weight']
 data_size = data['Data_Size']
 SAT_Mag_dir = get_repository_path() / 'systematics' / 'SatMag.csv'
 LIM_Mag_dir = get_repository_path() / 'systematics' / 'LimMag.csv'
-CF_Map = ut.cost_function_map(ra, dec, AB, dist, Teff, weight, data_size, SAT_Mag_dir, LIM_Mag_dir, radius = 7, output_dir=None, 
+CF_Map = ut.cost_function_map(ra, dec, AB, dist, Teff, weight, data_size, SAT_Mag_dir, LIM_Mag_dir, radius = 7,
                               resolution = 15, dust_map_version='bayestar2019')
 # dust_map = ut.dust_map(100, dist = 500)
 ut.Plot_Cartesian_Sky_Map(
